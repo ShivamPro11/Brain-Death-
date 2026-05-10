@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BRAIN DEATH</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600;800&family=Space+Mono&display=swap');
+        
+        :root {
+            --zen-primary: #14b8a6;
+            --zen-bg: #0f172a;
+            --zen-card: rgba(30, 41, 59, 0.8);
+        }
+
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            color: #f1f5f9; 
+            overflow: hidden;
+            touch-action: manipulation;
+            height: 100dvh;
+        }
+
+        .glass-3d {
+            background: var(--zen-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 
+                        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+        }
+
+        .btn-zen {
+            background: linear-gradient(145deg, #134e4a, #0f172a);
+            border: 1px solid var(--zen-primary);
+            box-shadow: 0 4px 0 #0d9488;
+        }
+
+        .btn-zen:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #0d9488;
+        }
+
+        .matrix-cell {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        
+        .matrix-cell.target { 
+            background: var(--zen-primary);
+            box-shadow: 0 0 15px var(--zen-primary);
+        }
+
+        .text-3d {
+            text-shadow: 0 2px 0 #0d9488, 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        /* Ad Overlay UI */
+        #ad-layer {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Prevent text selection */
+        * { user-select: none; -webkit-tap-highlight-color: transparent; }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <!-- Ad Playback Screen -->
+    <div id="ad-layer">
+        <div class="text-teal-400 animate-spin text-4xl mb-4"><i class="fas fa-circle-notch"></i></div>
+        <div class="text-white font-mono text-[10px] tracking-widest uppercase">Streaming Sponsored Content...</div>
+        <button id="close-ad-btn" class="mt-8 px-6 py-2 glass-3d text-xs hidden">CLOSE AD</button>
+    </div>
+
+    <header class="p-4 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-3">
+            <h1 class="text-xl font-extrabold tracking-tighter text-3d italic uppercase">BRAIN DEATH</h1>
+        </div>
+        <div class="glass-3d px-3 py-1 text-[10px] font-mono text-teal-400">
+            N-SCORE: <span id="total-score-display" class="text-white">0</span>
+        </div>
+    </header>
+
+    <main class="flex-1 relative overflow-hidden px-4 pb-4">
+        <div id="menu-view" class="absolute inset-0 overflow-y-auto p-2 grid grid-cols-2 md:grid-cols-4 gap-4 content-start"></div>
+
+        <div id="game-view" class="absolute inset-0 hidden flex flex-col p-2">
+            <div class="glass-3d p-3 mb-4 flex justify-between items-center shrink-0">
+                <button onclick="app.requestBackMenu()" class="w-8 h-8 flex items-center justify-center text-teal-400 rounded-full bg-white/5">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div id="timer-display" class="font-mono font-bold text-teal-400 text-lg">0.0s</div>
+            </div>
+            
+            <div id="game-canvas" class="flex-1 glass-3d flex items-center justify-center p-4 relative overflow-hidden"></div>
+            
+            <div id="game-instruction" class="mt-4 p-2 text-center text-[10px] font-mono text-teal-500 uppercase tracking-widest"></div>
+        </div>
+
+        <div id="overlay" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-slate-950/90 backdrop-blur-md">
+            <div class="glass-3d p-8 max-w-sm w-full mx-4 text-center">
+                <div id="overlay-icon" class="text-5xl mb-4"></div>
+                <h3 id="overlay-title" class="text-xl font-bold mb-1"></h3>
+                <p id="overlay-msg" class="text-slate-400 font-mono text-[10px] mb-6 uppercase tracking-widest"></p>
+                <button id="overlay-btn" class="w-full btn-zen py-3 rounded-xl text-teal-400 font-bold uppercase tracking-widest"></button>
+            </div>
+        </div>
+    </main>
+
+<script>
+/** * AD MANAGER 
+ * Place your Adsterra / Monetag scripts inside the showVideoAd function.
+ */
+const AdManager = {
+    adLayer: null,
+    closeBtn: null,
+    
+    init() {
+        this.adLayer = document.getElementById('ad-layer');
+        this.closeBtn = document.getElementById('close-ad-btn');
+    },
+
+    showVideoAd(callback) {
+        console.log("Ad Triggered");
+        this.adLayer.style.display = 'flex';
+        this.closeBtn.classList.add('hidden');
+
+        // --- PASTE YOUR ADSTERRA / MONETAG CODE BELOW ---
+        // Example logic for Monetag/Adsterra: 
+        // window.show_rewarded_ad(); 
+        
+        // Simulating ad playback for 3 seconds
+        setTimeout(() => {
+            this.closeBtn.classList.remove('hidden');
+            this.closeBtn.onclick = () => {
+                this.adLayer.style.display = 'none';
+                if (callback) callback();
+            };
+        }, 3000); 
+    }
+};
+
+const AudioEngine = {
+    ctx: null,
+    init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+    osc(freq, type, vol, dur) {
+        this.init();
+        const o = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        o.type = type;
+        o.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        g.gain.setValueAtTime(vol, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + dur);
+        o.connect(g); g.connect(this.ctx.destination);
+        o.start(); o.stop(this.ctx.currentTime + dur);
+    },
+    click() { this.osc(600, 'sine', 0.1, 0.1); },
+    win() { this.osc(523, 'sine', 0.1, 0.3); setTimeout(()=>this.osc(659,'sine',0.1,0.3),100); },
+    loss() { this.osc(120, 'sawtooth', 0.1, 0.5); },
+    tick() { this.osc(1200, 'sine', 0.03, 0.05); }
+};
+
+class BrainDeath {
+    constructor() {
+        this.progress = JSON.parse(localStorage.getItem('brainDeathProgress')) || {};
+        this.sessionLevelsCompleted = 0;
+        this.currentGameId = null;
+        this.currentLevel = 1;
+        this.timer = null;
+        this.gameActive = false;
+        this.init();
+    }
+
+    init() {
+        AdManager.init();
+        this.renderMenu();
+        this.updateTotalScore();
+    }
+
+    updateTotalScore() {
+        let total = Object.values(this.progress).reduce((a, b) => a + (b-1), 0);
+        document.getElementById('total-score-display').textContent = total;
+    }
+
+    renderMenu() {
+        const menu = document.getElementById('menu-view');
+        menu.innerHTML = GAMES_CONFIG.map(game => `
+            <div onclick="app.selectGame('${game.id}')" class="glass-3d p-4 flex flex-col items-center justify-center gap-2 cursor-pointer">
+                <i class="fas ${game.icon} text-teal-400 text-lg"></i>
+                <h3 class="font-bold text-[10px] text-white uppercase text-center">${game.name}</h3>
+                <span class="text-[8px] text-teal-600 font-mono">LVL ${this.progress[game.id] || 1}</span>
+            </div>`).join('');
+    }
+
+    // Triggered when Back Arrow is pressed
+    requestBackMenu() {
+        AudioEngine.click();
+        AdManager.showVideoAd(() => {
+            this.showMenu();
+        });
+    }
+
+    showMenu() {
+        clearInterval(this.timer);
+        this.gameActive = false;
+        document.getElementById('game-view').classList.add('hidden');
+        document.getElementById('menu-view').classList.remove('hidden');
+        document.getElementById('overlay').classList.add('hidden');
+        this.renderMenu();
+        this.updateTotalScore();
+    }
+
+    selectGame(gameId) {
+        AudioEngine.click();
+        this.currentGameId = gameId;
+        this.currentLevel = this.progress[gameId] || 1;
+        document.getElementById('menu-view').classList.add('hidden');
+        document.getElementById('game-view').classList.remove('hidden');
+        this.startLevel();
+    }
+
+    showOverlay(success, msg) {
+        this.gameActive = false;
+        clearInterval(this.timer);
+        const overlay = document.getElementById('overlay');
+        overlay.classList.remove('hidden');
+        if (success) {
+            AudioEngine.win();
+            document.getElementById('overlay-icon').innerHTML = '<i class="fas fa-check-circle text-teal-400"></i>';
+            document.getElementById('overlay-title').textContent = "SUCCESS";
+            document.getElementById('overlay-msg').textContent = "Neural Link Stable";
+            document.getElementById('overlay-btn').textContent = "NEXT NODE";
+            document.getElementById('overlay-btn').onclick = () => {
+                // Check if level milestone reached
+                this.sessionLevelsCompleted++;
+                
+                // Triggers Ad after EACH level completion
+                AdManager.showVideoAd(() => {
+                    this.currentLevel++;
+                    this.progress[this.currentGameId] = this.currentLevel;
+                    localStorage.setItem('brainDeathProgress', JSON.stringify(this.progress));
+                    overlay.classList.add('hidden');
+                    
+                    // Specific milestone for every 6 levels globally in session
+                    if(this.sessionLevelsCompleted % 6 === 0) {
+                        console.log("6 Level Milestone Reached");
+                    }
+                    
+                    this.startLevel();
+                });
+            };
+        } else {
+            AudioEngine.loss();
+            document.getElementById('overlay-icon').innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+            document.getElementById('overlay-title').textContent = "FAILED";
+            document.getElementById('overlay-msg').textContent = msg || "Signal Lost";
+            document.getElementById('overlay-btn').textContent = "REBOOT";
+            document.getElementById('overlay-btn').onclick = () => { overlay.classList.add('hidden'); this.startLevel(); };
+        }
+    }
+
+    startTimer(sec, onEnd) {
+        clearInterval(this.timer);
+        let time = sec;
+        const display = document.getElementById('timer-display');
+        this.timer = setInterval(() => {
+            time -= 0.1;
+            display.textContent = Math.max(0, time).toFixed(1) + 's';
+            if (time < 3 && time > 0) AudioEngine.tick();
+            if (time <= 0) { clearInterval(this.timer); if(this.gameActive) onEnd(); }
+        }, 100);
+    }
+
+    startLevel() {
+        this.gameActive = true;
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = '';
+        const diff = Math.min(1, (this.currentLevel - 1) / 40);
+        
+        switch(this.currentGameId) {
+            case 'memory_matrix': this.gameMemoryMatrix(diff); break;
+            case 'quick_math': this.gameQuickMath(diff); break;
+            case 'color_match': this.gameIrisSync(diff); break;
+            case 'number_order': this.gameNumberOrder(diff); break;
+            case 'symbol_hunt': this.gamePatternScan(diff); break;
+            case 'fast_fingers': this.gameFastFingers(diff); break;
+            case 'simon_says': this.gameSimonRecall(diff); break;
+            case 'even_odd': this.gameEvenOdd(diff); break;
+        }
+    }
+
+    // --- GAMES (LOCKED FOR STABILITY) ---
+
+    gamePatternScan(diff) {
+        const symbols = ['◈', '◇', '◎', '▣', '▤', '▥', '▦', '▧', '▨', '▩', '▪', '▫', '▲', '▼', '◀', '▶', '●', '★', '✖', '✚', '⬢', '⬣', '⬥', '⬦'];
+        const target = symbols[Math.floor(Math.random() * symbols.length)];
+        const gridCount = Math.min(20, 12 + Math.floor(diff * 12));
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `
+            <div class="flex flex-col items-center gap-4 w-full max-w-xs">
+                <div class="flex flex-col items-center glass-3d p-3 border-teal-500/30 w-full">
+                    <span class="text-[9px] text-teal-600 font-mono uppercase mb-1">Target Signature</span>
+                    <span class="text-4xl text-white">${target}</span>
+                </div>
+                <div id="pattern-grid" class="grid grid-cols-4 gap-2 w-full"></div>
+            </div>`;
+        const grid = document.getElementById('pattern-grid');
+        const options = [target];
+        while(options.length < gridCount) {
+            const s = symbols[Math.floor(Math.random() * symbols.length)];
+            if(!options.includes(s)) options.push(s);
+        }
+        options.sort(() => Math.random() - 0.5);
+        options.forEach(s => {
+            const btn = document.createElement('button');
+            btn.className = "glass-3d aspect-square flex items-center justify-center text-xl text-slate-500 transition-colors active:text-teal-400";
+            btn.textContent = s;
+            btn.onclick = () => { AudioEngine.click(); s === target ? this.showOverlay(true) : this.showOverlay(false, "IDENT ERROR"); };
+            grid.appendChild(btn);
+        });
+        document.getElementById('game-instruction').textContent = "SCAN & IDENTIFY TARGET";
+        this.startTimer(Math.max(1.2, 4 - diff * 3), () => this.showOverlay(false, "SCAN OVERLOAD"));
+    }
+
+    gameIrisSync(diff) {
+        const logic = [
+            { adj: 'Vibrant', obj: 'Forest', colName: 'Green', hex: '#22c55e' },
+            { adj: 'Deep', obj: 'Ocean', colName: 'Blue', hex: '#3b82f6' },
+            { adj: 'Burning', obj: 'Lava', colName: 'Red', hex: '#ef4444' },
+            { adj: 'Cloudy', obj: 'Sky', colName: 'Sky', hex: '#0ea5e9' },
+            { adj: 'Frozen', obj: 'Lake', colName: 'Cyan', hex: '#06b6d4' },
+            { adj: 'Radiant', obj: 'Sun', colName: 'Yellow', hex: '#eab308' },
+            { adj: 'Dark', obj: 'Coal', colName: 'Slate', hex: '#475569' },
+            { adj: 'Pure', obj: 'Snow', colName: 'White', hex: '#f8fafc' },
+            { adj: 'Fresh', obj: 'Grass', colName: 'Green', hex: '#16a34a' }
+        ];
+        const item = logic[Math.floor(Math.random() * logic.length)];
+        const isMatch = Math.random() > 0.5;
+        let displayHex = isMatch ? item.hex : logic.filter(l => l.hex !== item.hex)[Math.floor(Math.random() * 8)].hex;
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `
+            <div class="flex flex-col items-center gap-10 text-center">
+                <div class="flex flex-col gap-1">
+                    <div class="text-3xl font-black italic tracking-tighter" style="color:${displayHex}">${item.adj.toUpperCase()} ${item.obj.toUpperCase()}</div>
+                </div>
+                <div class="flex gap-4">
+                    <button id="no" class="glass-3d px-8 py-4 text-slate-500 font-bold text-xs">FALSE</button>
+                    <button id="yes" class="glass-3d px-8 py-4 text-teal-400 font-bold text-xs border-teal-500/40">TRUE</button>
+                </div>
+            </div>`;
+        document.getElementById('no').onclick = () => { AudioEngine.click(); !isMatch ? this.showOverlay(true) : this.showOverlay(false); };
+        document.getElementById('yes').onclick = () => { AudioEngine.click(); isMatch ? this.showOverlay(true) : this.showOverlay(false); };
+        document.getElementById('game-instruction').textContent = "VERIFY NATURAL COLOR";
+        this.startTimer(Math.max(0.8, 3.5 - diff * 3), () => this.showOverlay(false));
+    }
+
+    gameMemoryMatrix(diff) {
+        const count = Math.floor(9 + diff * 16);
+        const targetsCount = Math.floor(3 + diff * 6);
+        const cols = Math.ceil(Math.sqrt(count));
+        const canvas = document.getElementById('game-canvas');
+        const grid = document.createElement('div');
+        grid.className = "grid gap-1.5";
+        grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        const targets = new Set();
+        while(targets.size < targetsCount) targets.add(Math.floor(Math.random() * count));
+        for(let i=0; i<count; i++) {
+            const c = document.createElement('div');
+            c.className = "w-10 h-10 matrix-cell";
+            if(targets.has(i)) c.classList.add('target');
+            grid.appendChild(c);
+        }
+        canvas.appendChild(grid);
+        document.getElementById('game-instruction').textContent = "MEMORIZE";
+        setTimeout(() => {
+            if(!this.gameActive) return;
+            grid.childNodes.forEach(c => c.classList.remove('target'));
+            document.getElementById('game-instruction').textContent = "RESTORE";
+            this.startTimer(5, () => this.showOverlay(false));
+            let found = 0;
+            grid.childNodes.forEach((c, i) => {
+                c.onclick = () => {
+                    AudioEngine.click();
+                    if(targets.has(i)) {
+                        if(!c.classList.contains('target')) { c.classList.add('target'); found++; if(found === targetsCount) this.showOverlay(true); }
+                    } else this.showOverlay(false);
+                };
+            });
+        }, 1200);
+    }
+
+    gameQuickMath(diff) {
+        const a = 10 + Math.floor(Math.random() * 50);
+        const b = 5 + Math.floor(Math.random() * 30);
+        const ans = a + b;
+        const opts = [ans, ans+2, ans-2, ans+10].sort(()=>Math.random()-0.5);
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `<div class="flex flex-col items-center gap-6"><div class="text-5xl font-mono font-bold">${a}+${b}</div><div id="opts" class="grid grid-cols-2 gap-3"></div></div>`;
+        opts.forEach(v => {
+            const btn = document.createElement('button');
+            btn.className = "glass-3d p-4 font-mono text-teal-400";
+            btn.textContent = v;
+            btn.onclick = () => { AudioEngine.click(); v === ans ? this.showOverlay(true) : this.showOverlay(false); };
+            document.getElementById('opts').appendChild(btn);
+        });
+        this.startTimer(4, () => this.showOverlay(false));
+    }
+
+    gameNumberOrder(diff) {
+        const count = 4 + Math.floor(diff * 6);
+        const nums = Array.from({length: count}, (_, i) => i + 1).sort(()=>Math.random()-0.5);
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `<div id="box" class="relative w-full h-full"></div>`;
+        const box = document.getElementById('box');
+        let current = 1;
+        nums.forEach(n => {
+            const btn = document.createElement('button');
+            btn.className = "glass-3d absolute w-10 h-10 flex items-center justify-center text-xs font-bold text-teal-400";
+            btn.textContent = n;
+            btn.style.left = (5 + Math.random() * 80) + '%';
+            btn.style.top = (5 + Math.random() * 85) + '%';
+            btn.onclick = () => {
+                AudioEngine.click();
+                if(n === current) { btn.style.opacity = '0.2'; btn.style.pointerEvents = 'none'; current++; if(current > count) this.showOverlay(true); }
+                else { this.showOverlay(false); }
+            };
+            box.appendChild(btn);
+        });
+        this.startTimer(5, () => this.showOverlay(false));
+    }
+
+    gameFastFingers(diff) {
+        let taps = 15 + Math.floor(diff * 30);
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `<div id="target-btn" class="w-32 h-32 glass-3d rounded-full flex items-center justify-center text-3xl font-black text-teal-400 border-4 border-teal-500/20">${taps}</div>`;
+        const btn = document.getElementById('target-btn');
+        btn.onclick = () => { AudioEngine.click(); taps--; btn.textContent = taps; if(taps <= 0) this.showOverlay(true); };
+        this.startTimer(5, () => this.showOverlay(false));
+    }
+
+    gameEvenOdd(diff) {
+        const val = Math.floor(Math.random() * 999);
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `<div class="flex flex-col items-center gap-10"><div class="text-6xl font-bold font-mono">${val}</div><div class="flex gap-4"><button onclick="app.checkEO(${val},true)" class="glass-3d px-8 py-4 text-teal-400 font-bold">EVEN</button><button onclick="app.checkEO(${val},false)" class="glass-3d px-8 py-4 text-slate-500 font-bold">ODD</button></div></div>`;
+        this.startTimer(2, () => this.showOverlay(false));
+    }
+    checkEO(v, isEven) { AudioEngine.click(); (v % 2 === 0) === isEven ? this.showOverlay(true) : this.showOverlay(false); }
+
+    gameSimonRecall(diff) {
+        const len = 3 + Math.floor(diff * 5);
+        const seq = Array.from({length: len}, () => Math.floor(Math.random() * 4));
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `<div class="grid grid-cols-2 gap-4">${[0,1,2,3].map(i => `<div id="p${i}" class="w-20 h-20 glass-3d"></div>`).join('')}</div>`;
+        let step = 0;
+        const play = () => {
+            if(step >= len) { this.startTimer(len*2, ()=>this.showOverlay(false)); return; }
+            const p = document.getElementById('p'+seq[step]);
+            p.style.background = "rgba(20, 184, 166, 0.5)"; AudioEngine.tick();
+            setTimeout(() => { p.style.background = ""; step++; setTimeout(play, 300); }, 400);
+        };
+        setTimeout(play, 800);
+        let userStep = 0;
+        [0,1,2,3].forEach(i => {
+            document.getElementById('p'+i).onclick = () => {
+                AudioEngine.click();
+                if(i === seq[userStep]) { userStep++; if(userStep === len) this.showOverlay(true); }
+                else { this.showOverlay(false); }
+            }
+        });
+    }
+}
+
+const GAMES_CONFIG = [
+    { id: 'memory_matrix', name: 'Memory Matrix', icon: 'fa-th-large' },
+    { id: 'quick_math', name: 'Neural Logic', icon: 'fa-calculator' },
+    { id: 'color_match', name: 'Iris Sync', icon: 'fa-eye' },
+    { id: 'number_order', name: 'Flow State', icon: 'fa-list-ol' },
+    { id: 'symbol_hunt', name: 'Pattern Scan', icon: 'fa-fingerprint' },
+    { id: 'fast_fingers', name: 'Reflex Point', icon: 'fa-bolt' },
+    { id: 'simon_says', name: 'Echo Recall', icon: 'fa-wave-square' },
+    { id: 'even_odd', name: 'Binary Shift', icon: 'fa-toggle-on' }
+];
+
+const app = new BrainDeath();
+</script>
+</body>
+</html>
