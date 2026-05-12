@@ -329,4 +329,300 @@ class BrainDeath {
         this.startTimer(Math.max(1.2, 4 - diff * 3), () => this.showOverlay(false, "SCAN OVERLOAD"));
     }
 
-  
+      gameIrisSync(diff) {
+        const logic = [
+    { adj: 'Vibrant', obj: 'Forest', colName: 'Green', hex: '#22c55e' },
+    { adj: 'Deep', obj: 'Ocean', colName: 'Blue', hex: '#3b82f6' },
+    { adj: 'Burning', obj: 'Lava', colName: 'Red', hex: '#ef4444' },
+    { adj: 'Cloudy', obj: 'Sky', colName: 'Sky', hex: '#0ea5e9' },
+    { adj: 'Frozen', obj: 'Lake', colName: 'Cyan', hex: '#06b6d4' },
+    { adj: 'Radiant', obj: 'Sun', colName: 'Yellow', hex: '#eab308' },
+    { adj: 'Dark', obj: 'Coal', colName: 'Slate', hex: '#475569' },
+    { adj: 'Pure', obj: 'Snow', colName: 'White', hex: '#f8fafc' },
+    { adj: 'Fresh', obj: 'Grass', colName: 'Green', hex: '#16a34a' },
+    { adj: 'Royal', obj: 'Amethyst', colName: 'Purple', hex: '#9333ea' },
+    { adj: 'Sweet', obj: 'Strawberry', colName: 'Pink', hex: '#ec4899' },
+    { adj: 'Juicy', obj: 'Orange', colName: 'Orange', hex: '#f97316' },
+    { adj: 'Golden', obj: 'Wheat', colName: 'Amber', hex: '#f59e0b' },
+    { adj: 'Mystic', obj: 'Night', colName: 'Indigo', hex: '#4338ca' },
+    { adj: 'Soft', obj: 'Rose', colName: 'Pink', hex: '#f472b6' },
+    { adj: 'Wild', obj: 'Jungle', colName: 'Emerald', hex: '#10b981' },
+    { adj: 'Shiny', obj: 'Silver', colName: 'Gray', hex: '#9ca3af' },
+    { adj: 'Ancient', obj: 'Bronze', colName: 'Brown', hex: '#92400e' },
+    { adj: 'Electric', obj: 'Lightning', colName: 'Yellow', hex: '#fde047' },
+    { adj: 'Cold', obj: 'Iceberg', colName: 'Cyan', hex: '#67e8f9' },
+    { adj: 'Dangerous', obj: 'Blood', colName: 'Red', hex: '#dc2626' },
+    { adj: 'Calm', obj: 'River', colName: 'Blue', hex: '#2563eb' },
+    { adj: 'Dusty', obj: 'Sand', colName: 'Beige', hex: '#d6d3d1' },
+    { adj: 'Bright', obj: 'Lemon', colName: 'Yellow', hex: '#facc15' },
+    { adj: 'Natural', obj: 'Wood', colName: 'Brown', hex: '#78350f' },
+    { adj: 'Heavy', obj: 'Stone', colName: 'Gray', hex: '#6b7280' },
+    { adj: 'Glowing', obj: 'Ruby', colName: 'Red', hex: '#b91c1c' },
+    { adj: 'Peaceful', obj: 'Mint', colName: 'Mint', hex: '#6ee7b7' },
+    { adj: 'Fresh', obj: 'Leaf', colName: 'Lime', hex: '#84cc16' },
+    { adj: 'Stormy', obj: 'Cloud', colName: 'Gray', hex: '#94a3b8' },
+    { adj: 'Hot', obj: 'Magma', colName: 'Orange', hex: '#ea580c' },
+    { adj: 'Silent', obj: 'Moon', colName: 'Silver', hex: '#d1d5db' },
+    { adj: 'Toxic', obj: 'Acid', colName: 'Lime', hex: '#a3e635' },
+    { adj: 'Deep', obj: 'Galaxy', colName: 'Purple', hex: '#7e22ce' },
+    { adj: 'Crystal', obj: 'Diamond', colName: 'White', hex: '#ffffff' },
+    { adj: 'Fiery', obj: 'Phoenix', colName: 'Orange', hex: '#fb923c' },
+    { adj: 'Oceanic', obj: 'Wave', colName: 'Blue', hex: '#0284c7' },
+    { adj: 'Velvet', obj: 'Wine', colName: 'Maroon', hex: '#7f1d1d' },
+    { adj: 'Blooming', obj: 'Tulip', colName: 'Pink', hex: '#fb7185' },
+    { adj: 'Shadowy', obj: 'Cave', colName: 'Slate', hex: '#334155' },
+    { adj: 'Burnt', obj: 'Ash', colName: 'Gray', hex: '#71717a' },
+    { adj: 'Refreshing', obj: 'Watermelon', colName: 'Green', hex: '#4ade80' },
+    { adj: 'Royal', obj: 'Sapphire', colName: 'Blue', hex: '#1d4ed8' },
+    { adj: 'Lovely', obj: 'Cherry', colName: 'Red', hex: '#f43f5e' },
+    { adj: 'Dark', obj: 'Void', colName: 'Black', hex: '#111827' },
+    { adj: 'Frozen', obj: 'Glacier', colName: 'Cyan', hex: '#22d3ee' },
+    { adj: 'Sunny', obj: 'Banana', colName: 'Yellow', hex: '#fde68a' },
+    { adj: 'Sharp', obj: 'Cactus', colName: 'Green', hex: '#15803d' },
+    { adj: 'Ancient', obj: 'Gold', colName: 'Gold', hex: '#eab308' },
+    { adj: 'Magic', obj: 'Potion', colName: 'Purple', hex: '#8b5cf6' },
+    { adj: 'Floral', obj: 'Lavender', colName: 'Lavender', hex: '#c084fc' },
+    { adj: 'Nightly', obj: 'Shadow', colName: 'Black', hex: '#1e293b' },
+    { adj: 'Arctic', obj: 'Frost', colName: 'Blue', hex: '#7dd3fc' },
+    { adj: 'Autumn', obj: 'Maple', colName: 'Orange', hex: '#fb923c' },
+    { adj: 'Juicy', obj: 'Apple', colName: 'Red', hex: '#ef4444' },
+    { adj: 'Fresh', obj: 'Pear', colName: 'Green', hex: '#65a30d' },
+    { adj: 'Soft', obj: 'Cotton', colName: 'White', hex: '#f9fafb' },
+    { adj: 'Bright', obj: 'Neon', colName: 'Cyan', hex: '#06b6d4' },
+    { adj: 'Heavy', obj: 'Iron', colName: 'Gray', hex: '#78716c' },
+    { adj: 'Tropical', obj: 'Parrot', colName: 'Green', hex: '#22c55e' },
+    { adj: 'Dangerous', obj: 'Fire', colName: 'Red', hex: '#dc2626' },
+    { adj: 'Cosmic', obj: 'Nebula', colName: 'Purple', hex: '#6d28d9' },
+    { adj: 'Sweet', obj: 'Candy', colName: 'Pink', hex: '#f472b6' },
+    { adj: 'Mysterious', obj: 'Mist', colName: 'Gray', hex: '#9ca3af' },
+    { adj: 'Elegant', obj: 'Pearl', colName: 'White', hex: '#f3f4f6' },
+    { adj: 'Wild', obj: 'Tiger', colName: 'Orange', hex: '#f97316' },
+    { adj: 'Natural', obj: 'Bamboo', colName: 'Green', hex: '#65a30d' },
+    { adj: 'Ocean', obj: 'Whale', colName: 'Blue', hex: '#2563eb' },
+    { adj: 'Glittering', obj: 'Star', colName: 'Yellow', hex: '#facc15' },
+    { adj: 'Shallow', obj: 'Pond', colName: 'Teal', hex: '#14b8a6' },
+    { adj: 'Fierce', obj: 'Dragon', colName: 'Red', hex: '#b91c1c' },
+    { adj: 'Cool', obj: 'Breeze', colName: 'Sky', hex: '#38bdf8' },
+    { adj: 'Lovely', obj: 'Peach', colName: 'Orange', hex: '#fdba74' },
+    { adj: 'Strong', obj: 'Steel', colName: 'Gray', hex: '#6b7280' },
+    { adj: 'Blooming', obj: 'Lotus', colName: 'Pink', hex: '#f9a8d4' },
+    { adj: 'Deep', obj: 'Berry', colName: 'Purple', hex: '#7c3aed' },
+    { adj: 'Fresh', obj: 'Kiwi', colName: 'Lime', hex: '#84cc16' },
+    { adj: 'Golden', obj: 'Honey', colName: 'Amber', hex: '#fbbf24' },
+    { adj: 'Dark', obj: 'Obsidian', colName: 'Black', hex: '#0f172a' },
+    { adj: 'Silent', obj: 'Rain', colName: 'Blue', hex: '#60a5fa' },
+    { adj: 'Burning', obj: 'Torch', colName: 'Orange', hex: '#fb923c' },
+    { adj: 'Fresh', obj: 'Cucumber', colName: 'Green', hex: '#4d7c0f' },
+    { adj: 'Bright', obj: 'Daisy', colName: 'White', hex: '#ffffff' },
+    { adj: 'Royal', obj: 'Crown', colName: 'Gold', hex: '#ca8a04' },
+    { adj: 'Crystal', obj: 'Water', colName: 'Cyan', hex: '#67e8f9' },
+    { adj: 'Lovely', obj: 'Flamingo', colName: 'Pink', hex: '#fb7185' },
+    { adj: 'Night', obj: 'Raven', colName: 'Black', hex: '#111827' },
+    { adj: 'Fresh', obj: 'Lime', colName: 'Lime', hex: '#a3e635' },
+    { adj: 'Ancient', obj: 'Temple', colName: 'Stone', hex: '#78716c' },
+    { adj: 'Icy', obj: 'Crystal', colName: 'Blue', hex: '#93c5fd' },
+    { adj: 'Burnt', obj: 'Charcoal', colName: 'Slate', hex: '#374151' },
+    { adj: 'Sunny', obj: 'Marigold', colName: 'Yellow', hex: '#facc15' },
+    { adj: 'Deep', obj: 'Sea', colName: 'Navy', hex: '#1e3a8a' },
+    { adj: 'Radiant', obj: 'Aura', colName: 'Purple', hex: '#a855f7' },
+    { adj: 'Fresh', obj: 'Spinach', colName: 'Green', hex: '#15803d' },
+    { adj: 'Elegant', obj: 'Ivory', colName: 'White', hex: '#fafaf9' },
+    { adj: 'Wild', obj: 'Fox', colName: 'Orange', hex: '#ea580c' },
+    { adj: 'Toxic', obj: 'Venom', colName: 'Green', hex: '#22c55e' },
+    { adj: 'Stormy', obj: 'Thunder', colName: 'Gray', hex: '#6b7280' },
+    { adj: 'Dreamy', obj: 'Violet', colName: 'Purple', hex: '#8b5cf6' },
+    { adj: 'Soft', obj: 'Bubble', colName: 'Pink', hex: '#f9a8d4' },
+    { adj: 'Frozen', obj: 'Tundra', colName: 'Cyan', hex: '#67e8f9' },
+    { adj: 'Glowing', obj: 'Ember', colName: 'Orange', hex: '#f97316' },
+    { adj: 'Royal', obj: 'Velvet', colName: 'Maroon', hex: '#7f1d1d' },
+    { adj: 'Bright', obj: 'Canary', colName: 'Yellow', hex: '#fde047' },
+    { adj: 'Natural', obj: 'Fern', colName: 'Green', hex: '#16a34a' },
+    { adj: 'Oceanic', obj: 'Coral', colName: 'Pink', hex: '#fb7185' },
+    { adj: 'Dark', obj: 'Panther', colName: 'Black', hex: '#111827' },
+    { adj: 'Ancient', obj: 'Rune', colName: 'Slate', hex: '#475569' },
+    { adj: 'Mystic', obj: 'Orb', colName: 'Indigo', hex: '#4338ca' },
+    { adj: 'Golden', obj: 'Phoenix', colName: 'Amber', hex: '#f59e0b' },
+    { adj: 'Heavy', obj: 'Titanium', colName: 'Gray', hex: '#9ca3af' },
+    { adj: 'Blooming', obj: 'Rosemary', colName: 'Green', hex: '#22c55e' },
+    { adj: 'Burning', obj: 'Meteor', colName: 'Red', hex: '#dc2626' },
+    { adj: 'Soft', obj: 'Vanilla', colName: 'Cream', hex: '#fef3c7' },
+    { adj: 'Radiant', obj: 'Halo', colName: 'Gold', hex: '#facc15' },
+    { adj: 'Cold', obj: 'Mist', colName: 'Cyan', hex: '#a5f3fc' },
+    { adj: 'Fresh', obj: 'Avocado', colName: 'Green', hex: '#65a30d' },
+    { adj: 'Shiny', obj: 'Mirror', colName: 'Silver', hex: '#d1d5db' },
+    { adj: 'Dark', obj: 'Knight', colName: 'Black', hex: '#0f172a' },
+    { adj: 'Elegant', obj: 'Ruby', colName: 'Red', hex: '#e11d48' },
+    { adj: 'Royal', obj: 'Ocean', colName: 'Blue', hex: '#2563eb' },
+    { adj: 'Sweet', obj: 'Berry', colName: 'Pink', hex: '#ec4899' },
+    { adj: 'Ancient', obj: 'Moss', colName: 'Green', hex: '#4d7c0f' },
+    { adj: 'Crystal', obj: 'Ice', colName: 'Blue', hex: '#7dd3fc' },
+    { adj: 'Dangerous', obj: 'Volcano', colName: 'Red', hex: '#ef4444' },
+    { adj: 'Bright', obj: 'Sunflower', colName: 'Yellow', hex: '#facc15' },
+    { adj: 'Mystic', obj: 'Galaxy', colName: 'Purple', hex: '#7c3aed' },
+    { adj: 'Silent', obj: 'Fog', colName: 'Gray', hex: '#9ca3af' },
+    { adj: 'Wild', obj: 'Emerald', colName: 'Green', hex: '#10b981' },
+    { adj: 'Cold', obj: 'Snowflake', colName: 'White', hex: '#ffffff' },
+    { adj: 'Burning', obj: 'Inferno', colName: 'Orange', hex: '#ea580c' },
+    { adj: 'Oceanic', obj: 'Lagoon', colName: 'Teal', hex: '#0f766e' },
+    { adj: 'Fresh', obj: 'MintLeaf', colName: 'Mint', hex: '#6ee7b7' },
+    { adj: 'Deep', obj: 'Universe', colName: 'Indigo', hex: '#312e81' },
+    { adj: 'Glowing', obj: 'Lantern', colName: 'Amber', hex: '#fbbf24' },
+    { adj: 'Lovely', obj: 'Blossom', colName: 'Pink', hex: '#f472b6' },
+    { adj: 'Heavy', obj: 'Granite', colName: 'Gray', hex: '#71717a' },
+    { adj: 'Radiant', obj: 'Light', colName: 'Yellow', hex: '#fde047' },
+    { adj: 'Frozen', obj: 'Arctic', colName: 'Cyan', hex: '#67e8f9' },
+    { adj: 'Natural', obj: 'Olive', colName: 'Green', hex: '#65a30d' },
+    { adj: 'Royal', obj: 'Plum', colName: 'Purple', hex: '#9333ea' },
+    { adj: 'Soft', obj: 'Cloud', colName: 'White', hex: '#f8fafc' },
+    { adj: 'Dangerous', obj: 'Crimson', colName: 'Red', hex: '#b91c1c' },
+    { adj: 'Bright', obj: 'Buttercup', colName: 'Yellow', hex: '#facc15' },
+    { adj: 'Ancient', obj: 'Stonewall', colName: 'Slate', hex: '#475569' },
+    { adj: 'Tropical', obj: 'Palm', colName: 'Green', hex: '#16a34a' },
+    { adj: 'Dreamy', obj: 'Twilight', colName: 'Indigo', hex: '#4338ca' },
+    { adj: 'Elegant', obj: 'Diamond', colName: 'White', hex: '#ffffff' }
+];
+        const isMatch = Math.random() > 0.5;
+        let displayHex = isMatch ? item.hex : logic.filter(l => l.hex !== item.hex)[Math.floor(Math.random() * 8)].hex;
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `
+            <div class="flex flex-col items-center gap-10 text-center">
+                <div class="flex flex-col gap-1">
+                    <div class="text-3xl font-black italic tracking-tighter" style="color:${displayHex}">${item.adj.toUpperCase()} ${item.obj.toUpperCase()}</div>
+                </div>
+                <div class="flex gap-4">
+                    <button id="no" class="glass-3d px-8 py-4 text-slate-500 font-bold text-xs">FALSE</button>
+                    <button id="yes" class="glass-3d px-8 py-4 text-teal-400 font-bold text-xs border-teal-500/40">TRUE</button>
+                </div>
+            </div>`;
+        document.getElementById('no').onclick = () => { AudioEngine.click(); !isMatch ? this.showOverlay(true) : this.showOverlay(false); };
+        document.getElementById('yes').onclick = () => { AudioEngine.click(); isMatch ? this.showOverlay(true) : this.showOverlay(false); };
+        document.getElementById('game-instruction').textContent = "VERIFY NATURAL COLOR";
+        this.startTimer(Math.max(0.8, 3.5 - diff * 3), () => this.showOverlay(false));
+    }
+
+    gameMemoryMatrix(diff) {
+        const count = Math.floor(9 + diff * 16);
+        const targetsCount = Math.floor(3 + diff * 6);
+        const cols = Math.ceil(Math.sqrt(count));
+        const canvas = document.getElementById('game-canvas');
+        const grid = document.createElement('div');
+        grid.className = "grid gap-1.5";
+        grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        const targets = new Set();
+        while(targets.size < targetsCount) targets.add(Math.floor(Math.random() * count));
+        for(let i=0; i<count; i++) {
+            const c = document.createElement('div');
+            c.className = "w-10 h-10 matrix-cell";
+            if(targets.has(i)) c.classList.add('target');
+            grid.appendChild(c);
+        }
+        canvas.appendChild(grid);
+        document.getElementById('game-instruction').textContent = "MEMORIZE";
+        setTimeout(() => {
+            if(!this.gameActive) return;
+            grid.childNodes.forEach(c => c.classList.remove('target'));
+            document.getElementById('game-instruction').textContent = "RESTORE";
+            this.startTimer(5, () => this.showOverlay(false));
+            let found = 0;
+            grid.childNodes.forEach((c, i) => {
+                c.onclick = () => {
+                    AudioEngine.click();
+                    if(targets.has(i)) {
+                        if(!c.classList.contains('target')) { c.classList.add('target'); found++; if(found === targetsCount) this.showOverlay(true); }
+                    } else this.showOverlay(false);
+                };
+            });
+        }, 1200);
+    }
+
+    gameQuickMath(diff) {
+        const a = 10 + Math.floor(Math.random() * 50);
+        const b = 5 + Math.floor(Math.random() * 30);
+        const ans = a + b;
+        const opts = [ans, ans+2, ans-2, ans+10].sort(()=>Math.random()-0.5);
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `<div class="flex flex-col items-center gap-6"><div class="text-5xl font-mono font-bold">${a}+${b}</div><div id="opts" class="grid grid-cols-2 gap-3"></div></div>`;
+        opts.forEach(v => {
+            const btn = document.createElement('button');
+            btn.className = "glass-3d p-4 font-mono text-teal-400";
+            btn.textContent = v;
+            btn.onclick = () => { AudioEngine.click(); v === ans ? this.showOverlay(true) : this.showOverlay(false); };
+            document.getElementById('opts').appendChild(btn);
+        });
+        this.startTimer(4, () => this.showOverlay(false));
+    }
+
+    gameNumberOrder(diff) {
+        const count = 4 + Math.floor(diff * 6);
+        const nums = Array.from({length: count}, (_, i) => i + 1).sort(()=>Math.random()-0.5);
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `<div id="box" class="relative w-full h-full"></div>`;
+        const box = document.getElementById('box');
+        let current = 1;
+        nums.forEach(n => {
+            const btn = document.createElement('button');
+            btn.className = "glass-3d absolute w-10 h-10 flex items-center justify-center text-xs font-bold text-teal-400";
+            btn.textContent = n;
+            btn.style.left = (5 + Math.random() * 80) + '%';
+            btn.style.top = (5 + Math.random() * 85) + '%';
+            btn.onclick = () => {
+                AudioEngine.click();
+                if(n === current) { btn.style.opacity = '0.2'; btn.style.pointerEvents = 'none'; current++
+
+        canvas.innerHTML = `<div id="target-btn" class="w-32 h-32 glass-3d rounded-full flex items-center justify-center text-3xl font-black text-teal-400 border-4 border-teal-500/20 active:scale-90 transition-transform">${taps}</div>`;
+        const btn = document.getElementById('target-btn');
+        btn.onclick = () => { AudioEngine.click(); taps--; btn.textContent = taps; if(taps <= 0) this.showOverlay(true); };
+        this.startTimer(5, () => this.showOverlay(false));
+    }
+
+    gameEvenOdd(diff) {
+        const val = Math.floor(Math.random() * 999);
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `<div class="flex flex-col items-center gap-10"><div class="text-6xl font-bold font-mono">${val}</div><div class="flex gap-4"><button id="evenBtn" class="glass-3d px-8 py-4 text-teal-400 font-bold">EVEN</button><button id="oddBtn" class="glass-3d px-8 py-4 text-slate-500 font-bold">ODD</button></div></div>`;
+        document.getElementById('evenBtn').onclick = () => this.checkEO(val, true);
+        document.getElementById('oddBtn').onclick = () => this.checkEO(val, false);
+        this.startTimer(2, () => this.showOverlay(false));
+    }
+    checkEO(v, isEven) { AudioEngine.click(); (v % 2 === 0) === isEven ? this.showOverlay(true) : this.showOverlay(false); }
+
+    gameSimonRecall(diff) {
+        const len = 3 + Math.floor(diff * 5);
+        const seq = Array.from({length: len}, () => Math.floor(Math.random() * 4));
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `<div class="grid grid-cols-2 gap-4">${[0,1,2,3].map(i => `<div id="p${i}" class="w-20 h-20 glass-3d transition-colors"></div>`).join('')}</div>`;
+        let step = 0;
+        const play = () => {
+            if(!this.gameActive) return;
+            if(step >= len) { this.startTimer(len*2, ()=>this.showOverlay(false)); return; }
+            const p = document.getElementById('p'+seq[step]);
+            p.style.background = "rgba(20, 184, 166, 0.5)"; AudioEngine.tick();
+            setTimeout(() => { p.style.background = ""; step++; setTimeout(play, 300); }, 400);
+        };
+        setTimeout(play, 800);
+        let userStep = 0;
+        [0,1,2,3].forEach(i => {
+            document.getElementById('p'+i).onclick = () => {
+                AudioEngine.click();
+                if(i === seq[userStep]) { userStep++; if(userStep === len) this.showOverlay(true); }
+                else { this.showOverlay(false); }
+            }
+        });
+    }
+}
+
+const GAMES_CONFIG = [
+    { id: 'memory_matrix', name: 'Memory Matrix', icon: 'fa-th-large' },
+    { id: 'quick_math', name: 'Neural Logic', icon: 'fa-calculator' },
+    { id: 'color_match', name: 'Iris Sync', icon: 'fa-eye' },
+    { id: 'number_order', name: 'Flow State', icon: 'fa-list-ol' },
+    { id: 'symbol_hunt', name: 'Pattern Scan', icon: 'fa-fingerprint' },
+    { id: 'fast_fingers', name: 'Reflex Point', icon: 'fa-bolt' },
+    { id: 'simon_says', name: 'Echo Recall', icon: 'fa-wave-square' },
+    { id: 'even_odd', name: 'Binary Shift', icon: 'fa-toggle-on' }
+];
+
+const app = new BrainDeath();
+</script>
+</body>
+</html>
+
