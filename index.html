@@ -328,7 +328,6 @@ class BrainDeath {
         document.getElementById('game-instruction').textContent = "SCAN & IDENTIFY TARGET";
         this.startTimer(Math.max(1.2, 4 - diff * 3), () => this.showOverlay(false, "SCAN OVERLOAD"));
     }
-
       gameIrisSync(diff) {
         const logic = [
     { adj: 'Vibrant', obj: 'Forest', colName: 'Green', hex: '#22c55e' },
@@ -416,13 +415,6 @@ class BrainDeath {
     { adj: 'Bright', obj: 'Daisy', colName: 'White', hex: '#ffffff' },
     { adj: 'Royal', obj: 'Crown', colName: 'Gold', hex: '#ca8a04' },
     { adj: 'Crystal', obj: 'Water', colName: 'Cyan', hex: '#67e8f9' },
-    { adj: 'Lovely', obj: 'Flamingo', colName: 'Pink', hex: '#fb7185' },
-    { adj: 'Night', obj: 'Raven', colName: 'Black', hex: '#111827' },
-    { adj: 'Fresh', obj: 'Lime', colName: 'Lime', hex: '#a3e635' },
-    { adj: 'Ancient', obj: 'Temple', colName: 'Stone', hex: '#78716c' },
-    { adj: 'Icy', obj: 'Crystal', colName: 'Blue', hex: '#93c5fd' },
-    { adj: 'Burnt', obj: 'Charcoal', colName: 'Slate', hex: '#374151' },
-    { adj: 'Sunny', obj: 'Marigold', colName: 'Yellow', hex: '#facc15' },
     { adj: 'Deep', obj: 'Sea', colName: 'Navy', hex: '#1e3a8a' },
     { adj: 'Radiant', obj: 'Aura', colName: 'Purple', hex: '#a855f7' },
     { adj: 'Fresh', obj: 'Spinach', colName: 'Green', hex: '#15803d' },
@@ -457,12 +449,6 @@ class BrainDeath {
     { adj: 'Ancient', obj: 'Moss', colName: 'Green', hex: '#4d7c0f' },
     { adj: 'Crystal', obj: 'Ice', colName: 'Blue', hex: '#7dd3fc' },
     { adj: 'Dangerous', obj: 'Volcano', colName: 'Red', hex: '#ef4444' },
-    { adj: 'Bright', obj: 'Sunflower', colName: 'Yellow', hex: '#facc15' },
-    { adj: 'Mystic', obj: 'Galaxy', colName: 'Purple', hex: '#7c3aed' },
-    { adj: 'Silent', obj: 'Fog', colName: 'Gray', hex: '#9ca3af' },
-    { adj: 'Wild', obj: 'Emerald', colName: 'Green', hex: '#10b981' },
-    { adj: 'Cold', obj: 'Snowflake', colName: 'White', hex: '#ffffff' },
-    { adj: 'Burning', obj: 'Inferno', colName: 'Orange', hex: '#ea580c' },
     { adj: 'Oceanic', obj: 'Lagoon', colName: 'Teal', hex: '#0f766e' },
     { adj: 'Fresh', obj: 'MintLeaf', colName: 'Mint', hex: '#6ee7b7' },
     { adj: 'Deep', obj: 'Universe', colName: 'Indigo', hex: '#312e81' },
