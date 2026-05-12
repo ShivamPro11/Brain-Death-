@@ -440,3 +440,59 @@ class BrainDeath {
         let taps = 15 + Math.floor(diff * 30);
         const canvas = document.getElementById('game-canvas');
   
+        canvas.innerHTML = `<div id="target-btn" class="w-32 h-32 glass-3d rounded-full flex items-center justify-center text-3xl font-black text-teal-400 border-4 border-teal-500/20 active:scale-90 transition-transform">${taps}</div>`;
+        const btn = document.getElementById('target-btn');
+        btn.onclick = () => { AudioEngine.click(); taps--; btn.textContent = taps; if(taps <= 0) this.showOverlay(true); };
+        this.startTimer(5, () => this.showOverlay(false));
+    }
+
+    gameEvenOdd(diff) {
+        const val = Math.floor(Math.random() * 999);
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `<div class="flex flex-col items-center gap-10"><div class="text-6xl font-bold font-mono">${val}</div><div class="flex gap-4"><button id="evenBtn" class="glass-3d px-8 py-4 text-teal-400 font-bold">EVEN</button><button id="oddBtn" class="glass-3d px-8 py-4 text-slate-500 font-bold">ODD</button></div></div>`;
+        document.getElementById('evenBtn').onclick = () => this.checkEO(val, true);
+        document.getElementById('oddBtn').onclick = () => this.checkEO(val, false);
+        this.startTimer(2, () => this.showOverlay(false));
+    }
+    checkEO(v, isEven) { AudioEngine.click(); (v % 2 === 0) === isEven ? this.showOverlay(true) : this.showOverlay(false); }
+
+    gameSimonRecall(diff) {
+        const len = 3 + Math.floor(diff * 5);
+        const seq = Array.from({length: len}, () => Math.floor(Math.random() * 4));
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `<div class="grid grid-cols-2 gap-4">${[0,1,2,3].map(i => `<div id="p${i}" class="w-20 h-20 glass-3d transition-colors"></div>`).join('')}</div>`;
+        let step = 0;
+        const play = () => {
+            if(!this.gameActive) return;
+            if(step >= len) { this.startTimer(len*2, ()=>this.showOverlay(false)); return; }
+            const p = document.getElementById('p'+seq[step]);
+            p.style.background = "rgba(20, 184, 166, 0.5)"; AudioEngine.tick();
+            setTimeout(() => { p.style.background = ""; step++; setTimeout(play, 300); }, 400);
+        };
+        setTimeout(play, 800);
+        let userStep = 0;
+        [0,1,2,3].forEach(i => {
+            document.getElementById('p'+i).onclick = () => {
+                AudioEngine.click();
+                if(i === seq[userStep]) { userStep++; if(userStep === len) this.showOverlay(true); }
+                else { this.showOverlay(false); }
+            }
+        });
+    }
+}
+
+const GAMES_CONFIG = [
+    { id: 'memory_matrix', name: 'Memory Matrix', icon: 'fa-th-large' },
+    { id: 'quick_math', name: 'Neural Logic', icon: 'fa-calculator' },
+    { id: 'color_match', name: 'Iris Sync', icon: 'fa-eye' },
+    { id: 'number_order', name: 'Flow State', icon: 'fa-list-ol' },
+    { id: 'symbol_hunt', name: 'Pattern Scan', icon: 'fa-fingerprint' },
+    { id: 'fast_fingers', name: 'Reflex Point', icon: 'fa-bolt' },
+    { id: 'simon_says', name: 'Echo Recall', icon: 'fa-wave-square' },
+    { id: 'even_odd', name: 'Binary Shift', icon: 'fa-toggle-on' }
+];
+
+const app = new BrainDeath();
+</script>
+</body>
+</html>
