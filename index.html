@@ -500,4 +500,303 @@ const DATA_LEXICAL = [
             if(targets.has(i)) c.classList.add('target');
             grid.appendChild(c);
         }
+        setTimeout(() => {
+            if(!this.gameActive) return;
+            grid.childNodes.forEach(c => c.classList.remove('target'));
+            this.startTimer(5, () => this.showOverlay(false));
+            let found = 0;
+            grid.childNodes.forEach((c, i) => {
+                c.onclick = () => {
+                    if(targets.has(i)) {
+                        if(!c.classList.contains('target')) { 
+                            c.classList.add('target'); 
+                            found++; 
+                            if(found === targetsCount) this.showOverlay(true); 
+                        }
+                    } else this.showOverlay(false);
+                };
+            });
+        }, 1200);
+    }
 
+    gameEchoRecall(diff) {
+        const gridSize = Math.floor(4 + diff * 46);
+        const seqLen = Math.floor(3 + diff * 17);
+        const cols = Math.ceil(Math.sqrt(gridSize));
+        const canvas = document.getElementById('game-canvas');
+        
+        canvas.innerHTML = `<div id="grid" class="matrix-grid"></div>`;
+        const grid = document.getElementById('grid');
+        grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        
+        for(let i=0; i<gridSize; i++) {
+            const cell = document.createElement('div');
+            cell.className = "matrix-cell";
+            cell.id = `echo-${i}`;
+            grid.appendChild(cell);
+        }
+
+        const seq = Array.from({length: seqLen}, () => Math.floor(Math.random() * gridSize));
+        let step = 0;
+        const playSeq = () => {
+            if(!this.gameActive) return;
+            if(step >= seqLen) {
+                this.startTimer(seqLen * 1.5, () => this.showOverlay(false));
+                setupInput();
+                return;
+            }
+            const el = document.getElementById(`echo-${seq[step]}`);
+            el.classList.add('target');
+            AudioEngine.tick();
+            setTimeout(() => {
+                el.classList.remove('target');
+                step++;
+                setTimeout(playSeq, 400 - diff * 200);
+            }, 300);
+        };
+
+        let userIdx = 0;
+        const setupInput = () => {
+            grid.childNodes.forEach((cell, i) => {
+                cell.onclick = () => {
+                    AudioEngine.click();
+                    if(i === seq[userIdx]) {
+                        cell.classList.add('target');
+                        setTimeout(() => cell.classList.remove('target'), 200);
+                        userIdx++;
+                        if(userIdx === seqLen) this.showOverlay(true);
+                    } else this.showOverlay(false);
+                }
+            });
+        };
+
+        setTimeout(playSeq, 500);
+    }
+
+    gamePatternScan(diff) {
+        const symbols = ['◈', '★', '✖', '✚', '⬢', '⬣', '◆', '◉', '○', '☀', '☁', '☢', '☣', '☮', '☯', '🔥', '💧', '⚡', '🌈', '🍀', '🍎', '🍕', '🚗', '🚀', '💎', '🎮', '💡', '🔔', '❤️', '😎', '👻', '👽', '👾', '🤖'];
+        const target = symbols[Math.floor(Math.random() * symbols.length)];
+        const gridCount = Math.min(80, 20 + Math.floor(diff * 60));
+        const canvas = document.getElementById('game-canvas');
+        
+        canvas.innerHTML = `
+            <div class="flex flex-col items-center gap-4 w-full h-full">
+                <div class="glass-3d p-4 w-full text-center"><span class="text-5xl">${target}</span></div>
+                <div class="symbol-grid-container glass-3d flex-1">
+                    <div id="p-grid" class="grid grid-cols-4 gap-2"></div>
+                </div>
+            </div>`;
+        
+        const grid = document.getElementById('p-grid');
+        const opts = [target];
+        while(opts.length < gridCount) {
+            const s = symbols[Math.floor(Math.random() * symbols.length)];
+            if(!opts.includes(s)) opts.push(s);
+        }
+        
+        opts.sort(() => Math.random() - 0.5).forEach(s => {
+            const btn = document.createElement('button');
+            btn.className = "glass-3d aspect-square text-2xl flex items-center justify-center";
+            btn.textContent = s;
+            btn.onclick = () => s === target ? this.showOverlay(true) : this.showOverlay(false);
+            grid.appendChild(btn);
+        });
+        this.startTimer(10, () => this.showOverlay(false));
+    }
+
+    // --- OTHER GAMES (Neural Logic, Flow State, Lexical Logic, etc) ---
+    // (Keeping previous implementations but ensuring they fit the sizing and timer rules)
+
+    gameLexicalLogic(diff) {
+        const item = DATA_LEXICAL[this.currentLevel % DATA_LEXICAL.length];
+        const canvas = document.getElementById('game-canvas');
+        
+        let scrambled = item.scrambled;
+        const answer = item.answer;
+
+        canvas.innerHTML = `
+            <div class="flex flex-col items-center gap-8 w-full">
+                <div class="text-3xl font-mono text-teal-400 tracking-[0.5em] mb-4">${scrambled}</div>
+                <div id="word-opts" class="grid grid-cols-1 gap-2 w-full"></div>
+            </div>`;
+
+        const optCount = Math.min(6, 2 + Math.floor(diff * 5));
+        const options = [answer];
+        while(options.length < optCount) {
+            let r = DATA_LEXICAL[Math.floor(Math.random() * DATA_LEXICAL.length)].answer;
+            if(!options.includes(r)) options.push(r);
+        }
+        options.sort(() => Math.random() - 0.5);
+
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = "glass-3d py-3 text-sm font-mono hover:text-teal-400";
+            btn.textContent = opt;
+            btn.onclick = () => opt === answer ? this.showOverlay(true) : this.showOverlay(false);
+            document.getElementById('word-opts').appendChild(btn);
+        });
+
+        this.startTimer(Math.max(3, 10 - (diff * 7)), () => this.showOverlay(false));
+    }
+
+    gameBinaryShift(diff) {
+        const canvas = document.getElementById('game-canvas');
+        let val;
+        const magnitude = Math.pow(10, 1 + (diff * 14)); 
+        
+        const type = Math.random();
+        if (type < 0.4) {
+            val = (Math.random() * magnitude).toFixed(2);
+        } else if (type < 0.7) {
+            const n = Math.floor(Math.random() * (100 * (1+diff*10)));
+            const d = 2 + Math.floor(Math.random() * 8);
+            val = `${n}/${d}`;
+        } else {
+            val = Math.floor(Math.random() * magnitude).toString();
+        }
+
+        canvas.innerHTML = `
+            <div class="flex flex-col items-center gap-10">
+                <div class="text-xl font-bold font-mono break-all text-center px-4 leading-relaxed">${val}</div>
+                <div class="flex gap-4">
+                    <button id="evenBtn" class="glass-3d px-8 py-4 text-teal-400 font-bold">EVEN</button>
+                    <button id="oddBtn" class="glass-3d px-8 py-4 text-slate-500 font-bold">ODD</button>
+                </div>
+            </div>`;
+
+        const checkEven = (v) => {
+            if (v.includes('/')) {
+                const [n, d] = v.split('/').map(Number);
+                return (n / d) % 2 === 0;
+            }
+            return Math.floor(parseFloat(v)) % 2 === 0;
+        };
+
+        const isEven = checkEven(val);
+        document.getElementById('evenBtn').onclick = () => isEven ? this.showOverlay(true) : this.showOverlay(false);
+        document.getElementById('oddBtn').onclick = () => !isEven ? this.showOverlay(true) : this.showOverlay(false);
+        this.startTimer(Math.max(1, 5 - diff * 4), () => this.showOverlay(false));
+    }
+
+    gameFlowState(diff) {
+        const count = Math.floor(6 + diff * 49);
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `<div id="box" class="relative w-full h-full"></div>`;
+        const box = document.getElementById('box');
+        
+        let current = 1;
+        const nums = Array.from({length: count}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
+        
+        nums.forEach(n => {
+            const btn = document.createElement('button');
+            btn.className = "glass-3d absolute w-10 h-10 flex items-center justify-center text-[10px] font-bold text-teal-400";
+            btn.textContent = n;
+            btn.style.left = (5 + Math.random() * 80) + '%';
+            btn.style.top = (5 + Math.random() * 80) + '%';
+            btn.onclick = () => {
+                AudioEngine.click();
+                if(n === current) {
+                    btn.style.opacity = '0.1';
+                    btn.style.pointerEvents = 'none';
+                    current++;
+                    if(current > count) this.showOverlay(true);
+                } else this.showOverlay(false);
+            };
+            box.appendChild(btn);
+        });
+
+        this.startTimer(Math.max(5, count * 0.8), () => this.showOverlay(false));
+    }
+
+    gameReflexPoint(diff) {
+        let taps = Math.floor(10 + (diff * 190));
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `<div id="t-btn" class="w-40 h-40 glass-3d rounded-full flex flex-col items-center justify-center border-4 border-teal-500/30 active:scale-90 transition-transform cursor-pointer">
+            <span class="text-4xl font-black text-teal-400">${taps}</span>
+            <span class="text-[10px] font-mono text-teal-600 mt-2">TAP FREQUENCY</span>
+        </div>`;
+        const btn = document.getElementById('t-btn');
+        btn.onclick = () => {
+            AudioEngine.click();
+            taps--;
+            btn.querySelector('span').textContent = taps;
+            if(taps <= 0) this.showOverlay(true);
+        };
+        this.startTimer(Math.max(2, 6 + diff * 15), () => this.showOverlay(false));
+    }
+
+    gameNeuralLogic(diff) {
+        const canvas = document.getElementById('game-canvas');
+        let question, answer;
+        const mode = Math.random();
+        if (mode < 0.25) { 
+            const a = 10 + Math.floor(Math.random() * 100 * (1+diff*5));
+            const b = 10 + Math.floor(Math.random() * 100 * (1+diff*5));
+            question = `${a} + ${b}`; answer = a+b;
+        } else if (mode < 0.5) { 
+            const a = 50 + Math.floor(Math.random() * 100 * (1+diff*5));
+            const b = 10 + Math.floor(Math.random() * 50);
+            question = `${a} - ${b}`; answer = a-b;
+        } else if (mode < 0.75) { 
+            const a = 2 + Math.floor(Math.random() * 12 * (1+diff));
+            const b = 2 + Math.floor(Math.random() * 12);
+            question = `${a} × ${b}`; answer = a*b;
+        } else { 
+            const d = 2 + Math.floor(Math.random() * 4);
+            question = `1/${d} + 1/${d}`; answer = `2/${d}`;
+        }
+
+        canvas.innerHTML = `<div class="flex flex-col items-center gap-6"><div class="text-3xl font-bold font-mono">${question}</div><div id="opts" class="grid grid-cols-2 gap-3"></div></div>`;
+        const options = [answer, answer + 2, answer - 1, answer + 5].sort(() => Math.random() - 0.5);
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = "glass-3d p-4 font-mono text-teal-400";
+            btn.textContent = opt;
+            btn.onclick = () => opt == answer ? this.showOverlay(true) : this.showOverlay(false);
+            document.getElementById('opts').appendChild(btn);
+        });
+        this.startTimer(6, () => this.showOverlay(false));
+    }
+
+    gameGridSearch(diff) {
+        const size = Math.min(10, 5 + Math.floor(diff * 5));
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `<div id="s-grid" class="matrix-grid"></div>`;
+        const grid = document.getElementById('s-grid');
+        grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        const target = chars[Math.floor(Math.random() * chars.length)];
+        const targetIdx = Math.floor(Math.random() * (size*size));
+        for(let i=0; i<size*size; i++) {
+            const btn = document.createElement('button');
+            btn.className = "matrix-cell glass-3d text-sm font-bold flex items-center justify-center";
+            btn.textContent = i === targetIdx ? target : chars[Math.floor(Math.random()*chars.length)];
+            btn.onclick = () => i === targetIdx ? this.showOverlay(true) : this.showOverlay(false);
+            grid.appendChild(btn);
+        }
+        document.getElementById('game-instruction').textContent = `FIND "${target}"`;
+        this.startTimer(5, () => this.showOverlay(false));
+    }
+}
+
+const GAMES_CONFIG = [
+    { id: 'memory_matrix', name: 'Memory Matrix', icon: 'fa-th-large' },
+    { id: 'quick_math', name: 'Neural Logic', icon: 'fa-brain' },
+    { id: 'color_match', name: 'Iris Sync', icon: 'fa-eye' },
+    { id: 'number_order', name: 'Flow State', icon: 'fa-sort-numeric-down' },
+    { id: 'symbol_hunt', name: 'Pattern Scan', icon: 'fa-fingerprint' },
+    { id: 'fast_fingers', name: 'Reflex Point', icon: 'fa-bolt' },
+    { id: 'simon_says', name: 'Echo Recall', icon: 'fa-wave-square' },
+    { id: 'even_odd', name: 'Binary Shift', icon: 'fa-toggle-on' },
+    { id: 'word_arrange', name: 'Lexical Logic', icon: 'fa-spell-check' },
+    { id: 'grid_search', name: 'Grid Search', icon: 'fa-search' }
+];
+
+const app = new BrainDeath();
+</script>
+
+<!-- Adsterra Script Logic - Replace YOUR_SRC_HERE with your specific code -->
+<script type='text/javascript' src='//pl25801736.highcpmgate.com/83/82/87/8382878939281a812038712398.js'></script>
+
+</body>
+</html>
