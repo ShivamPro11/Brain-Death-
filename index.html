@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -276,4 +275,229 @@ const DATA_LEXICAL = [
     { scrambled: 'NOITULOVE', answer: 'EVOLUTION' }, { scrambled: 'NOITAZILIBOM', answer: 'MOBILIZATION' }, { scrambled: 'NOITACINUMMOC', answer: 'COMMUNICATION' }, { scrambled: 'NOITANIBMOC', answer: 'COMBINATION' }, { scrambled: 'YTILIBISSOP', answer: 'POSSIBILITY' }, { scrambled: 'NOITCENNOC', answer: 'CONNECTION' }, { scrambled: 'TNEMPOLEVED', answer: 'DEVELOPMENT' }, { scrambled: 'NOITACUDE', answer: 'EDUCATION' }, { scrambled: 'NOITANIGAMI', answer: 'IMAGINATION' }, { scrambled: 'YTILIBATS', answer: 'STABILITY' }, { scrambled: 'YTILIBANITSUS', answer: 'SUSTAINABILITY' }, { scrambled: 'NOITAMROFSNART', answer: 'TRANSFORMATION' }, { scrambled: 'NOITAVONNI', answer: 'INNOVATION' }, { scrambled: 'YTIRUCES', answer: 'SECURITY' }, { scrambled: 'NOITAROLPXE', answer: 'EXPLORATION' }, { scrambled: 'NOITACILPPA', answer: 'APPLICATION' }, { scrambled: 'NOITAZINAGRO', answer: 'ORGANIZATION' }, { scrambled: 'NOITATNESERP', answer: 'PRESENTATION' }, { scrambled: 'NOITAREPOOC', answer: 'COOPERATION' }, { scrambled: 'NOITATPRETNI', answer: 'INTERPRETATION' },
     { scrambled: 'NOITANRETNI', answer: 'INTERNATION' }, { scrambled: 'YTILIBISNOPSER', answer: 'RESPONSIBILITY' }, { scrambled: 'NOITATNEMELPMI', answer: 'IMPLEMENTATION' }, { scrambled: 'NOITACIFIREV', answer: 'VERIFICATION' }, { scrambled: 'NOITACIFITNEDI', answer: 'IDENTIFICATION' }, { scrambled: 'NOITAZILANOITANRETNI', answer: 'INTERNATIONALIZATION' }, { scrambled: 'NOITCUDORTNI', answer: 'INTRODUCTION' }, { scrambled: 'NOITANIDROOC', answer: 'COORDINATION' }, { scrambled: 'NOITATNEMUCOD', answer: 'DOCUMENTATION' }, { scrambled: 'NOITACIFISSALC', answer: 'CLASSIFICATION' }, { scrambled: 'NOITACINUMMOCELET', answer: 'TELECOMMUNICATION' }, { scrambled: 'NOITACIFICEPS', answer: 'SPECIFICATION' }, { scrambled: 'NOITAZIMITPO', answer: 'OPTIMIZATION' }, { scrambled: 'NOITAZILAUTSIV', answer: 'VISUALIZATION' }, { scrambled: 'NOITATNEMIREPXE', answer: 'EXPERIMENTATION' }, { scrambled: 'NOITAGERGETNI', answer: 'INTEGRATION' }, { scrambled: 'NOITATNEMURTSNI', answer: 'INSTRUMENTATION' }, { scrambled: 'NOITACIFIDOM', answer: 'MODIFICATION' }, { scrambled: 'NOITATNEMOTUA', answer: 'AUTOMATION' }, { scrambled: 'NOITACILPMIS', answer: 'SIMPLIFICATION' }, { scrambled: 'NOITAZILANOSREP', answer: 'PERSONALIZATION' }, { scrambled: 'NOITATNEMMOCER', answer: 'RECOMMENDATION' }, { scrambled: 'NOITACIFIRETREC', answer: 'CERTIFICATION' }, { scrambled: 'NOITATNEMUGRA', answer: 'ARGUMENTATION' }, { scrambled: 'NOITATNEMELPMOC', answer: 'COMPLEMENTATION' }, { scrambled: 'NOITACITNEHTUA', answer: 'AUTHENTICATION' }, { scrambled: 'NOITAZINORHCNYS', answer: 'SYNCHRONIZATION' }, { scrambled: 'NOITATNEMGARF', answer: 'FRAGMENTATION' }, { scrambled: 'NOITAZIMITPOERP', answer: 'PREOPTIMIZATION' }, { scrambled: 'NOITAZILARTNECED', answer: 'DECENTRALIZATION' }
 ];
-  
+  class BrainDeath {
+    constructor() {
+        this.progress = JSON.parse(localStorage.getItem('brainDeathProgress_v4')) || {};
+        this.lockedIrisIndices = JSON.parse(localStorage.getItem('lockedIrisIndices')) || [];
+        this.maxLevels = 250; 
+        this.currentGameId = null;
+        this.currentLevel = 0;
+        this.timer = null;
+        this.gameActive = false;
+        this.init();
+    }
+
+    init() {
+        this.renderMenu();
+        this.updateTotalScore();
+    }
+
+    updateTotalScore() {
+        let total = Object.values(this.progress).reduce((a, b) => a + b, 0);
+        document.getElementById('total-score-display').textContent = total;
+        if (total >= 2500) this.showWholeGameCompletion();
+    }
+
+    renderMenu() {
+        const menu = document.getElementById('menu-view');
+        menu.innerHTML = GAMES_CONFIG.map(game => {
+            const lvl = this.progress[game.id] || 0;
+            return `
+            <div onclick="app.selectGame('${game.id}')" class="glass-3d p-4 flex flex-col items-center justify-center gap-2 cursor-pointer active:scale-95 transition-transform">
+                <i class="fas ${game.icon} text-teal-400 text-lg"></i>
+                <h3 class="font-bold text-[9px] text-white uppercase text-center">${game.name}</h3>
+                <span class="text-[8px] text-teal-600 font-mono">LVL ${lvl} / ${this.maxLevels}</span>
+            </div>`;
+        }).join('');
+    }
+
+    requestBackMenu() {
+        AudioEngine.click();
+        AdManager.showAd(); // Show ad when going back
+        this.showMenu();
+    }
+
+    showMenu() {
+        clearInterval(this.timer);
+        this.gameActive = false;
+        document.getElementById('game-view').classList.add('hidden');
+        document.getElementById('menu-view').classList.remove('hidden');
+        document.getElementById('overlay').classList.add('hidden');
+        this.renderMenu();
+        this.updateTotalScore();
+    }
+
+    selectGame(gameId) {
+        AudioEngine.click();
+        this.currentGameId = gameId;
+        this.currentLevel = this.progress[gameId] || 0;
+        if(this.currentLevel >= 250) {
+            this.showInnerGameCompletion();
+            return;
+        }
+        document.getElementById('menu-view').classList.add('hidden');
+        document.getElementById('game-view').classList.remove('hidden');
+        this.startLevel();
+    }
+
+    showOverlay(success, msg) {
+        this.gameActive = false;
+        clearInterval(this.timer);
+        const overlay = document.getElementById('overlay');
+        overlay.classList.remove('hidden');
+        if (success) {
+            AudioEngine.win();
+            AdManager.trackLevel(); // Count levels for ads
+            document.getElementById('overlay-icon').innerHTML = '<i class="fas fa-check-circle text-teal-400"></i>';
+            document.getElementById('overlay-title').textContent = "STABLE";
+            document.getElementById('overlay-msg').textContent = "Node Secured";
+            document.getElementById('overlay-btn').textContent = "NEXT NODE";
+            document.getElementById('overlay-btn').onclick = () => this.finalizeWin();
+        } else {
+            AudioEngine.loss();
+            document.getElementById('overlay-icon').innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+            document.getElementById('overlay-title').textContent = "BREACHED";
+            document.getElementById('overlay-msg').textContent = msg || "Sync Fault";
+            document.getElementById('overlay-btn').textContent = "REBOOT";
+            document.getElementById('overlay-btn').onclick = () => { overlay.classList.add('hidden'); this.startLevel(); };
+        }
+    }
+
+    showInnerGameCompletion() {
+        const overlay = document.getElementById('overlay');
+        overlay.classList.remove('hidden');
+        document.getElementById('overlay-icon').innerHTML = '<i class="fas fa-medal text-yellow-500"></i>';
+        document.getElementById('overlay-title').textContent = "ZONE CLEARED";
+        document.getElementById('overlay-msg').textContent = "YOU MAY GO TO EXPLORE OTHER LEVELS TO COMPLETE WHOLE GAME OF 2500 LEVELS";
+        document.getElementById('overlay-btn').textContent = "RETURN TO HUB";
+        document.getElementById('overlay-btn').onclick = () => this.showMenu();
+    }
+
+    showWholeGameCompletion() {
+        document.body.classList.add('celebration-bg');
+        const overlay = document.getElementById('overlay');
+        overlay.classList.remove('hidden');
+        document.getElementById('overlay-card').classList.add('animate-bounce');
+        document.getElementById('overlay-icon').innerHTML = '<i class="fas fa-crown text-teal-400"></i>';
+        document.getElementById('overlay-title').textContent = "BRAIN DEATH ACHIEVED";
+        document.getElementById('overlay-msg').innerHTML = "Not THE END\nNew Levels are Added, Update\nBRAIN DEATH Game Now";
+        document.getElementById('overlay-btn').textContent = "MASTERED";
+        document.getElementById('overlay-btn').onclick = () => overlay.classList.add('hidden');
+    }
+
+    finalizeWin() {
+        this.currentLevel++;
+        this.progress[this.currentGameId] = this.currentLevel;
+        localStorage.setItem('brainDeathProgress_v4', JSON.stringify(this.progress));
+        document.getElementById('overlay').classList.add('hidden');
+        if (this.currentLevel >= 250) {
+            this.showInnerGameCompletion();
+        } else {
+            this.startLevel();
+        }
+        this.updateTotalScore();
+    }
+
+    startTimer(sec, onEnd) {
+        clearInterval(this.timer);
+        let time = sec;
+        const display = document.getElementById('timer-display');
+        this.timer = setInterval(() => {
+            time -= 0.1;
+            display.textContent = Math.max(0, time).toFixed(1) + 's';
+            if (time < 3 && time > 0) AudioEngine.tick();
+            if (time <= 0) { clearInterval(this.timer); if(this.gameActive) onEnd(); }
+        }, 100);
+    }
+
+    startLevel() {
+        this.gameActive = true;
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = '';
+        const diff = this.currentLevel / this.maxLevels;
+        document.getElementById('inner-level-display').textContent = `LVL ${this.currentLevel} / ${this.maxLevels}`;
+        
+        switch(this.currentGameId) {
+            case 'memory_matrix': this.gameMemoryMatrix(diff); break;
+            case 'quick_math': this.gameNeuralLogic(diff); break;
+            case 'color_match': this.gameIrisSync(diff); break;
+            case 'number_order': this.gameFlowState(diff); break;
+            case 'symbol_hunt': this.gamePatternScan(diff); break;
+            case 'fast_fingers': this.gameReflexPoint(diff); break;
+            case 'simon_says': this.gameEchoRecall(diff); break;
+            case 'even_odd': this.gameBinaryShift(diff); break;
+            case 'word_arrange': this.gameLexicalLogic(diff); break;
+            case 'grid_search', 'grid_search': this.gameGridSearch(diff); break;
+        }
+    }
+
+    gameIrisSync(diff) {
+        let available = DATA_IRIS.filter((_, i) => !this.lockedIrisIndices.includes(i));
+        if (available.length === 0) {
+            this.lockedIrisIndices = []; 
+            available = [...DATA_IRIS];
+        }
+
+        const idx = Math.floor(Math.random() * available.length);
+        const item = available[idx];
+        const originalIdx = DATA_IRIS.indexOf(item);
+
+        // 50/50 Chance of a True or False statement
+        const isMatch = Math.random() > 0.5;
+        
+        // If it shouldn't match, pick a random different color from the list
+        let displayHex = item.hex;
+        if (!isMatch) {
+            let other;
+            do {
+                other = DATA_IRIS[Math.floor(Math.random() * DATA_IRIS.length)];
+            } while (other.hex === item.hex);
+            displayHex = other.hex;
+        }
+
+        const canvas = document.getElementById('game-canvas');
+        canvas.innerHTML = `
+            <div class="flex flex-col items-center gap-10 text-center">
+                <div class="text-2xl font-black italic tracking-tighter" style="color:${displayHex}">${item.adj.toUpperCase()} ${item.obj.toUpperCase()}</div>
+                <div class="flex gap-4">
+                    <button id="no" class="glass-3d px-10 py-5 text-slate-500 font-bold">FALSE</button>
+                    <button id="yes" class="glass-3d px-10 py-5 text-teal-400 font-bold">TRUE</button>
+                </div>
+            </div>`;
+        
+        const handleResult = (userAnswer) => {
+            if (userAnswer === isMatch) {
+                this.lockedIrisIndices.push(originalIdx);
+                localStorage.setItem('lockedIrisIndices', JSON.stringify(this.lockedIrisIndices));
+                this.showOverlay(true);
+            } else {
+                this.showOverlay(false);
+            }
+        };
+
+        document.getElementById('no').onclick = () => handleResult(false);
+        document.getElementById('yes').onclick = () => handleResult(true);
+        this.startTimer(Math.max(1, 4 - diff * 3), () => this.showOverlay(false));
+    }
+
+    gameMemoryMatrix(diff) {
+        const count = Math.floor(9 + diff * 36);
+        const targetsCount = Math.floor(3 + diff * 15);
+        const cols = Math.ceil(Math.sqrt(count));
+        const canvas = document.getElementById('game-canvas');
+        
+        // Use a wrapper with grid styles to ensure enough size
+        canvas.innerHTML = `<div id="m-grid" class="matrix-grid"></div>`;
+        const grid = document.getElementById('m-grid');
+        grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        
+        const targets = new Set();
+        while(targets.size < targetsCount) targets.add(Math.floor(Math.random() * count));
+        
+        for(let i=0; i<count; i++) {
+            const c = document.createElement('div');
+            c.className = "matrix-cell";
+            if(targets.has(i)) c.classList.add('target');
+            grid.appendChild(c);
+        }
+
